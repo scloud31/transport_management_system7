@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2>Кабинет механика</h2>
+            <p class="lead">Техническое обслуживание и контроль транспорта</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Чек-листы -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Чек-листы</h5>
+                    <p class="card-text">Проверка технического состояния транспорта</p>
+                    <a href="{{ url_for('checklists_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Акты приема-передачи -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Акты приема-передачи</h5>
+                    <p class="card-text">Оформление актов приема-передачи оборудования</p>
+                    <a href="{{ url_for('acceptance_acts_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Техническое обслуживание -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Техническое обслуживание</h5>
+                    <p class="card-text">Плановое ТО и ремонт транспорта</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Запчасти -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Учет запчастей</h5>
+                    <p class="card-text">Учет расходных материалов и запчастей</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Отчеты -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Отчеты</h5>
+                    <p class="card-text">Формирование отчетов по ТО</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- График ТО -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">График ТО</h5>
+                    <p class="card-text">Планирование технического обслуживания</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список транспорта требующего внимания -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Транспорт требующий внимания</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Транспорт</th>
+                                    <th>Проблема</th>
+                                    <th>Срок</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        Нет транспорта требующего срочного внимания
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка назад -->
+    <div class="mt-5 text-center">
+        <a href="{{ url_for('main_menu') }}" class="btn btn-secondary">Назад в главное меню</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2>Главное меню</h2>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Сотрудники -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Сотрудники</h5>
+                    <p class="card-text">Управление базой сотрудников</p>
+                    <a href="{{ url_for('employees_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Транспорт -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Транспорт</h5>
+                    <p class="card-text">Управление транспортными средствами</p>
+                    <a href="{{ url_for('transport_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кабинет начальника ТЦ -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Кабинет начальника ТЦ</h5>
+                    <p class="card-text">Заявки на пропуска, перевахтовка</p>
+                    <a href="{{ url_for('head_of_department_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кабинет диспетчера -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Кабинет диспетчера</h5>
+                    <p class="card-text">Суточные заявки на технику</p>
+                    <a href="{{ url_for('dispatcher_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кабинет ОТ, ПБ и БДД -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Кабинет ОТ, ПБ и БДД</h5>
+                    <p class="card-text">Контроль сроков, тестирование</p>
+                    <a href="{{ url_for('safety_department_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кабинет кладовщика -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Кабинет кладовщика</h5>
+                    <p class="card-text">ТТН, спецодежда</p>
+                    <a href="{{ url_for('storekeeper_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кабинет механика -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Кабинет механика</h5>
+                    <p class="card-text">Чек-листы, акты</p>
+                    <a href="{{ url_for('mechanic_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

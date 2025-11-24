@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Создать заявку через границу ВЧНГ</h2>
+        <a href="{{ url_for('pass_requests_list') }}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('save_pass_request') }}">
+        <input type="hidden" name="request_type" value="{{ request_type }}">
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Основные данные</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Посты *</label>
+                            <div class="input-group">
+                                <select class="form-select" name="posts" id="postsSelect" multiple required>
+                                    <option value="">Выберите посты</option>
+                                    {% for post in posts %}
+                                    <option value="{{ post.id }}">{{ post.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" onclick="window.open('{{ url_for('manage_dictionaries') }}', '_blank')">
+                                    Управление
+                                </button>
+                            </div>
+                            <small class="text-muted">Для выбора нескольких удерживайте Ctrl</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Номер договора *</label>
+                            <select class="form-select" name="contract_id" required>
+                                <option value="">Выберите договор</option>
+                                {% for contract in contracts %}
+                                <option value="{{ contract.id }}">{{ contract.number }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">ИНН *</label>
+                            <div class="input-group">
+                                <select class="form-select" name="inn_id" required>
+                                    <option value="">Выберите ИНН организации</option>
+                                    {% for inn in inns %}
+                                    <option value="{{ inn.id }}">
+                                        {{ inn.inn }} - {{ inn.organization_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" onclick="window.open('{{ url_for('manage_dictionaries') }}', '_blank')">
+                                    Управление
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Период действия</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Дата начала *</label>
+                                <input type="date" class="form-control" name="start_date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Дата окончания *</label>
+                                <input type="date" class="form-control" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Сотрудники и транспорт</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="is_one_time" id="isOneTime">
+                            <label class="form-check-label" for="isOneTime">Разовый заезд</label>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Выбор сотрудников</label>
+                            <select class="form-select" name="employees" id="employeesSelect" multiple>
+                                {% for employee in employees %}
+                                <option value="{{ employee.id }}">
+                                    {{ employee.last_name }} {{ employee.first_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Выбор транспорта</label>
+                            <select class="form-select" name="vehicles" id="vehiclesSelect" multiple>
+                                {% for vehicle in vehicles %}
+                                <option value="{{ vehicle.id }}">
+                                    {{ vehicle.brand }} ({{ vehicle.license_plate }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Дополнительная информация</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Заявку сформировал *</label>
+                            <input type="text" class="form-control" name="formed_by" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Цель заезда</label>
+                            <textarea class="form-control" name="purpose" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Шаблон документа</h5>
+                    </div>
+                    <div class="card-body">
+                        <input type="file" class="form-control" name="template" accept=".docx">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">Сохранить и сгенерировать</button>
+                <a href="{{ url_for('pass_requests_list') }}" class="btn btn-secondary">Отменить</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+new MultiSelectTag('postsSelect');
+new MultiSelectTag('employeesSelect');
+new MultiSelectTag('vehiclesSelect');
+</script>
+{% endblock %}

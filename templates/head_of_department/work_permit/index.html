@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Наряд-допуск ШМР</h2>
+        <a href="{{ url_for('head_of_department_index') }}" class="btn btn-secondary">Назад</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Создать наряд-допуск</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('save_work_permit') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Номер наряда</label>
+                                    <input type="text" class="form-control" name="permit_number" value="{{ next_permit_number }}" readonly>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Тип шины</label>
+                                    <select class="form-select" name="tire_type" id="tireTypeSelect">
+                                        <option value="">Выберите тип шины</option>
+                                        <option value="Легковая">Легковая</option>
+                                        <option value="Грузовая">Грузовая</option>
+                                        <option value="Спецтехника">Спецтехника</option>
+                                    </select>
+                                    <small class="text-muted">
+                                        <a href="#" onclick="addNewTireType()">+ Добавить новый тип</a>
+                                    </small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Дата начала работ *</label>
+                                    <input type="date" class="form-control" name="start_date" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Время начала работ *</label>
+                                    <input type="time" class="form-control" name="start_time" required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Дата окончания работ *</label>
+                                    <input type="date" class="form-control" name="end_date" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Время окончания работ *</label>
+                                    <input type="time" class="form-control" name="end_time" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Ответственный за выдачу наряда *</label>
+                                    <select class="form-select" name="supervisor_id" required>
+                                        <option value="">Выберите ответственного</option>
+                                        {% for employee in employees %}
+                                        <option value="{{ employee.id }}">{{ employee.last_name }} {{ employee.first_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Ответственный руководитель работ *</label>
+                                    <select class="form-select" name="responsible_id" required>
+                                        <option value="">Выберите руководителя</option>
+                                        {% for employee in employees %}
+                                        <option value="{{ employee.id }}">{{ employee.last_name }} {{ employee.first_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Исполнитель *</label>
+                                    <select class="form-select" name="executor_id" required>
+                                        <option value="">Выберите исполнителя</option>
+                                        {% for employee in employees %}
+                                        <option value="{{ employee.id }}">{{ employee.last_name }} {{ employee.first_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Выбрать шаблон наряда-допуска</label>
+                            <input type="file" class="form-control" name="template" accept=".docx">
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-success">Сохранить наряд и открыть</button>
+                            <button type="button" class="btn btn-info" onclick="printPermit()">Печать</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Список нарядов</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for permit in recent_permits %}
+                        <div class="list-group-item">
+                            <small class="text-muted">№{{ permit.number }}</small><br>
+                            <strong>{{ permit.tire_type or 'Тип не указан' }}</strong><br>
+                            <small>{{ permit.start_date.strftime('%d.%m.%Y') }} - {{ permit.end_date.strftime('%d.%m.%Y') }}</small>
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center">Наряды не созданы</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addNewTireType() {
+    const name = prompt('Введите новый тип шины:');
+    if (name) {
+        // Добавление нового типа в базу данных
+        const select = document.getElementById('tireTypeSelect');
+        const option = new Option(name, name);
+        select.add(option);
+        select.value = name;
+    }
+}
+
+function printPermit() {
+    alert('Функция печати наряда-допуска в разработке');
+}
+</script>
+{% endblock %}

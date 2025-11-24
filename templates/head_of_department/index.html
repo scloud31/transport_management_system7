@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2>Кабинет начальника транспортного цеха</h2>
+            <p class="lead">Управление транспортными операциями и персоналом</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Заявки на пропуска -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Заявки на пропуска</h5>
+                    <p class="card-text">Оформление заявок на пропуска для сотрудников и транспорта</p>
+                    <a href="{{ url_for('pass_requests_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Перевахтовка -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Перевахтовка</h5>
+                    <p class="card-text">Организация перевозок сотрудников</p>
+                    <a href="{{ url_for('shift_handover_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Учет электроэнергии -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Учет электроэнергии</h5>
+                    <p class="card-text">Ведение учета потребления электроэнергии</p>
+                    <a href="{{ url_for('electricity_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Наряды-допуски -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Наряды-допуски</h5>
+                    <p class="card-text">Оформление нарядов-допусков на работы</p>
+                    <a href="{{ url_for('work_permit_index') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сотрудники -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Сотрудники</h5>
+                    <p class="card-text">Управление персоналом транспортного цеха</p>
+                    <a href="{{ url_for('employees_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Транспорт -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Транспорт</h5>
+                    <p class="card-text">Учет и управление транспортными средствами</p>
+                    <a href="{{ url_for('transport_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Быстрая статистика -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Быстрая статистика</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3>{{ employees_count }}</h3>
+                            <p class="text-muted">Сотрудников</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3>{{ vehicles_count }}</h3>
+                            <p class="text-muted">Единиц транспорта</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3>{{ active_requests }}</h3>
+                            <p class="text-muted">Активных заявок</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3>{{ expired_docs }}</h3>
+                            <p class="text-muted">Просроченных документов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка назад -->
+    <div class="mt-5 text-center">
+        <a href="{{ url_for('main_menu') }}" class="btn btn-secondary">Назад в главное меню</a>
+    </div>
+</div>
+{% endblock %}

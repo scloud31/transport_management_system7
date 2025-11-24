@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Учет спецодежды</h2>
+        <a href="{{ url_for('storekeeper_index') }}" class="btn btn-secondary">Назад</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Выдать спецодежду</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('issue_uniform') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Сотрудник *</label>
+                            <select class="form-select" name="employee_id" required>
+                                <option value="">Выберите сотрудника</option>
+                                {% for employee in employees %}
+                                <option value="{{ employee.id }}">
+                                    {{ employee.last_name }} {{ employee.first_name }} {{ employee.middle_name or '' }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Тип спецодежды *</label>
+                            <select class="form-select" name="uniform_type_id" required>
+                                <option value="">Выберите тип</option>
+                                {% for uniform_type in uniform_types %}
+                                <option value="{{ uniform_type.id }}">{{ uniform_type.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Дата выдачи *</label>
+                            <input type="date" class="form-control" name="issue_date" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Количество *</label>
+                            <input type="number" class="form-control" name="quantity" min="1" value="1" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">Выдать спецодежду</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Статистика</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3>{{ total_issued }}</h3>
+                            <small class="text-muted">Всего выдано</small>
+                        </div>
+                        <div class="col-6">
+                            <h3>{{ expiring_soon }}</h3>
+                            <small class="text-muted">Срок истекает скоро</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Быстрый поиск</h5>
+                </div>
+                <div class="card-body">
+                    <input type="text" class="form-control" placeholder="Поиск по сотруднику..." id="searchEmployee">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Выданная спецодежда</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Сотрудник</th>
+                            <th>Тип спецодежды</th>
+                            <th>Дата выдачи</th>
+                            <th>Срок действия</th>
+                            <th>Количество</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for uniform in employee_uniforms %}
+                        <tr>
+                            <td>
+                                {{ uniform.employee.last_name }} 
+                                {{ uniform.employee.first_name }}
+                            </td>
+                            <td>{{ uniform.uniform_type.name }}</td>
+                            <td>{{ uniform.issue_date.strftime('%d.%m.%Y') }}</td>
+                            <td>{{ uniform.expiry_date.strftime('%d.%m.%Y') }}</td>
+                            <td>{{ uniform.quantity }}</td>
+                            <td>
+                                {% if uniform.expiry_date < today %}
+                                <span class="badge bg-danger">Просрочена</span>
+                                {% elif (uniform.expiry_date - today).days <= 30 %}
+                                <span class="badge bg-warning">Скоро истекает</span>
+                                {% else %}
+                                <span class="badge bg-success">Действует</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="editUniform({{ uniform.id }})">✏️</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteUniform({{ uniform.id }})">🗑️</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">Спецодежда не выдавалась</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования -->
+<div class="modal fade" id="editUniformModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать выдачу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUniformForm">
+                    <input type="hidden" id="editUniformId" name="uniform_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Дата выдачи</label>
+                        <input type="date" class="form-control" id="editIssueDate" name="issue_date" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Количество</label>
+                        <input type="number" class="form-control" id="editQuantity" name="quantity" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" onclick="saveUniformEdit()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editUniform(uniformId) {
+    // Загрузка данных выдачи через AJAX
+    // Заполнение формы в модальном окне
+    document.getElementById('editUniformId').value = uniformId;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editUniformModal'));
+    modal.show();
+}
+
+function deleteUniform(uniformId) {
+    if (confirm('Вы уверены, что хотите удалить эту запись о выдаче спецодежды?')) {
+        // Удаление через AJAX
+        fetch(`/uniforms/${uniformId}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+
+function saveUniformEdit() {
+    const form = document.getElementById('editUniformForm');
+    if (form.checkValidity()) {
+        // Сохранение через AJAX
+        const formData = new FormData(form);
+        fetch('/uniforms/update', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('editUniformModal')).hide();
+                location.reload();
+            }
+        });
+    }
+}
+
+// Поиск по сотрудникам
+document.getElementById('searchEmployee').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const employeeName = row.cells[0].textContent.toLowerCase();
+        row.style.display = employeeName.includes(filter) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

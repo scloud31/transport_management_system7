@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Список сотрудников</h2>
+        <a href="{{ url_for('employee_add') }}" class="btn btn-success">Добавить сотрудника</a>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Поиск по фамилии..." id="searchInput">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="departmentFilter">
+                <option value="">Все подразделения</option>
+                {% for dept in departments %}
+                <option value="{{ dept.name }}">{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="positionFilter">
+                <option value="">Все должности</option>
+                {% for position in positions %}
+                <option value="{{ position.name }}">{{ position.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Список сотрудников -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ФИО</th>
+                            <th>Должность</th>
+                            <th>Подразделение</th>
+                            <th>Телефон</th>
+                            <th>Допуск</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employee in employees %}
+                        <tr>
+                            <td>
+                                <strong>{{ employee.last_name }} {{ employee.first_name }} {{ employee.middle_name or '' }}</strong>
+                                {% if employee.photo_path %}
+                                <span class="badge bg-info ms-1">Фото</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ employee.position.name if employee.position else 'Не указана' }}</td>
+                            <td>{{ employee.department.name if employee.department else 'Не указано' }}</td>
+                            <td>{{ employee.phone or 'Не указан' }}</td>
+                            <td>
+                                {% if employee.pass_number %}
+                                <span class="badge bg-success">{{ employee.pass_number }}</span>
+                                {% if employee.pass_expiry %}
+                                <br><small>до {{ employee.pass_expiry.strftime('%d.%m.%Y') }}</small>
+                                {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary">Нет</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('employee_card', employee_id=employee.id) }}" 
+                                       class="btn btn-info" title="Просмотр карточки">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('employee_edit', employee_id=employee.id) }}" 
+                                       class="btn btn-warning" title="Редактировать">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('employee_delete', employee_id=employee.id) }}" 
+                                          class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить этого сотрудника?');">
+                                        <button type="submit" class="btn btn-danger" title="Удалить">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Сотрудники не найдены</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка назад -->
+    <div class="mt-3">
+        <a href="{{ url_for('main_menu') }}" class="btn btn-secondary">Назад в главное меню</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Поиск по таблице
+document.getElementById('searchInput').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+
+// Фильтрация по подразделению
+document.getElementById('departmentFilter').addEventListener('change', function() {
+    const filterValue = this.value;
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const department = row.cells[2].textContent.trim();
+        if (!filterValue || department === filterValue) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+// Фильтрация по должности
+document.getElementById('positionFilter').addEventListener('change', function() {
+    const filterValue = this.value;
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const position = row.cells[1].textContent.trim();
+        if (!filterValue || position === filterValue) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

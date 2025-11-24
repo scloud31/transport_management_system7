@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ 'Редактировать' if form else 'Создать' }} форму чек-листа</h2>
+        <a href="{{ url_for('checklists_list') }}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('save_checklist_form') }}">
+        {% if form %}
+        <input type="hidden" name="form_id" value="{{ form.id }}">
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Основная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Название формы *</label>
+                    <input type="text" class="form-control" name="form_name" 
+                           value="{{ form.name if form else '' }}" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Структура формы</h5>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSection()">
+                        + Раздел
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="addField()">
+                        + Поле
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="formStructure">
+                    <!-- Структура формы будет генерироваться здесь -->
+                    {% if form and form.form_structure %}
+                        {{ form.form_structure|safe }}
+                    {% else %}
+                    <div class="alert alert-info">
+                        Добавьте элементы формы используя кнопки выше
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">Сохранить форму</button>
+            <a href="{{ url_for('checklists_list') }}" class="btn btn-secondary">Отменить</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let elementCount = 0;
+
+function addSection() {
+    elementCount++;
+    const structure = document.getElementById('formStructure');
+    
+    const sectionDiv = document.createElement('div');
+    sectionDiv.className = 'card mb-3 section-item';
+    sectionDiv.innerHTML = `
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <input type="text" class="form-control section-title" placeholder="Название раздела" 
+                   name="section_${elementCount}_title" required>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeElement(this)">×</button>
+        </div>
+        <div class="card-body" id="section_${elementCount}_fields">
+            <!-- Поля раздела -->
+        </div>
+    `;
+    
+    structure.appendChild(sectionDiv);
+}
+
+function addField() {
+    elementCount++;
+    const structure = document.getElementById('formStructure');
+    
+    // Если нет разделов, создаем сначала раздел
+    if (!structure.querySelector('.section-item')) {
+        addSection();
+    }
+    
+    // Добавляем поле в последний раздел
+    const lastSection = structure.querySelector('.section-item:last-child .card-body');
+    const fieldDiv = document.createElement('div');
+    fieldDiv.className = 'field-item mb-3 p-3 border rounded';
+    fieldDiv.innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">Тип поля</label>
+                <select class="form-select field-type" name="field_${elementCount}_type" onchange="updateFieldOptions(this)">
+                    <option value="text">Текст</option>
+                    <option value="number">Число</option>
+                    <option value="checkbox">Чекбокс</option>
+                    <option value="select">Выпадающий список</option>
+                    <option value="date">Дата</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Текст поля</label>
+                <input type="text" class="form-control field-label" name="field_${elementCount}_label" 
+                       placeholder="Введите текст поля" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeElement(this)">×</button>
+            </div>
+        </div>
+        <div class="field-options mt-2" id="field_${elementCount}_options">
+            <!-- Дополнительные опции для разных типов полей -->
+        </div>
+    `;
+    
+    lastSection.appendChild(fieldDiv);
+}
+
+function updateFieldOptions(select) {
+    const fieldDiv = select.closest('.field-item');
+    const optionsDiv = fieldDiv.querySelector('.field-options');
+    const fieldType = select.value;
+    
+    switch(fieldType) {
+        case 'select':
+            optionsDiv.innerHTML = `
+                <label class="form-label">Варианты ответов (через запятую)</label>
+                <input type="text" class="form-control" name="${select.name.replace('_type', '_options')}" 
+                       placeholder="Вариант 1, Вариант 2, Вариант 3">
+            `;
+            break;
+        case 'checkbox':
+            optionsDiv.innerHTML = `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" 
+                           name="${select.name.replace('_type', '_default')}" value="1">
+                    <label class="form-check-label">Отмечено по умолчанию</label>
+                </div>
+            `;
+            break;
+        default:
+            optionsDiv.innerHTML = '';
+    }
+}
+
+function removeElement(button) {
+    button.closest('.section-item, .field-item').remove();
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Если форма новая, добавляем первый раздел
+    {% if not form %}
+    addSection();
+    {% endif %}
+});
+</script>
+{% endblock %}

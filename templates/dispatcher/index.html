@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Кабинет диспетчера</h2>
+        <a href="{{ url_for('main_menu') }}" class="btn btn-secondary">Назад в главное меню</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>Шаблон заявки</h5>
+                    <input type="file" class="form-control mb-3" id="templateFile" accept=".docx">
+                    <button class="btn btn-outline-primary" onclick="saveTemplate()">Сохранить шаблон</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-success w-100 h-100" onclick="createDailyRequest('day')">
+                <h5>Создать дневную заявку</h5>
+                <small>08:00 - 20:00</small>
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100 h-100" onclick="createDailyRequest('night')">
+                <h5>Создать ночную заявку</h5>
+                <small>20:00 - 08:00</small>
+            </button>
+        </div>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Поиск заявок..." id="searchRequests">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="shiftFilter">
+                <option value="">Все смены</option>
+                <option value="day">Дневные</option>
+                <option value="night">Ночные</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="date" class="form-control" id="dateFilter">
+        </div>
+    </div>
+
+    <!-- Список заявок -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Тип смены</th>
+                            <th>Кол-во техники</th>
+                            <th>Объекты</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in daily_requests %}
+                        <tr>
+                            <td>{{ request.date.strftime('%d.%m.%Y') }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if request.shift_type == 'day' else 'primary' }}">
+                                    {{ 'День' if request.shift_type == 'day' else 'Ночь' }}
+                                </span>
+                            </td>
+                            <td>{{ request.vehicles_count }}</td>
+                            <td>{{ request.objects }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ request.status }}</span>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-info">Просмотр</a>
+                                <a href="#" class="btn btn-sm btn-warning">Редактировать</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Заявки не найдены</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно создания заявки -->
+<div class="modal fade" id="createRequestModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Создание заявки</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dailyRequestForm">
+                    <input type="hidden" id="shiftType" name="shift_type">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Дата заявки *</label>
+                        <input type="date" class="form-control" name="request_date" required>
+                    </div>
+                    
+                    <div id="vehiclesContainer">
+                        <!-- Динамически добавляемая техника -->
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="addVehicle()">
+                            + Добавить технику
+                        </button>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Объект *</label>
+                        <input type="text" class="form-control" name="object" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Заказчик *</label>
+                        <input type="text" class="form-control" name="customer" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" onclick="saveDailyRequest()">Сохранить заявку</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let vehicleCount = 0;
+
+function saveTemplate() {
+    const fileInput = document.getElementById('templateFile');
+    if (fileInput.files.length > 0) {
+        alert('Шаблон сохранен');
+    } else {
+        alert('Выберите файл шаблона');
+    }
+}
+
+function createDailyRequest(shiftType) {
+    document.getElementById('shiftType').value = shiftType;
+    document.getElementById('modalTitle').textContent = 
+        `Создание ${shiftType === 'day' ? 'дневной' : 'ночной'} заявки`;
+    
+    // Очищаем контейнер с техникой
+    document.getElementById('vehiclesContainer').innerHTML = '';
+    vehicleCount = 0;
+    
+    // Добавляем первую единицу техники
+    addVehicle();
+    
+    const modal = new bootstrap.Modal(document.getElementById('createRequestModal'));
+    modal.show();
+}
+
+function addVehicle() {
+    vehicleCount++;
+    const container = document.getElementById('vehiclesContainer');
+    
+    const vehicleDiv = document.createElement('div');
+    vehicleDiv.className = 'card mb-3 vehicle-item';
+    vehicleDiv.innerHTML = `
+        <div class="card-body">
+            <h6>Техника #${vehicleCount}</h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Тип техники *</label>
+                    <select class="form-select vehicle-type" name="vehicle_type_${vehicleCount}" required>
+                        <option value="">Выберите тип</option>
+                        <option value="ППУ">ППУ</option>
+                        <option value="Кран">Кран</option>
+                        <option value="Бульдозер">Бульдозер</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Водитель *</label>
+                    <select class="form-select vehicle-driver" name="vehicle_driver_${vehicleCount}" required>
+                        <option value="">Выберите водителя</option>
+                        <!-- Список водителей будет загружен динамически -->
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Смен подряд</label>
+                    <input type="text" class="form-control shifts-count" readonly>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeVehicle(this)">Удалить</button>
+        </div>
+    `;
+    
+    container.appendChild(vehicleDiv);
+    
+    // Загружаем водителей для выбранного типа техники
+    const typeSelect = vehicleDiv.querySelector('.vehicle-type');
+    const driverSelect = vehicleDiv.querySelector('.vehicle-driver');
+    const shiftsInput = vehicleDiv.querySelector('.shifts-count');
+    
+    typeSelect.addEventListener('change', function() {
+        loadDrivers(this.value, driverSelect, shiftsInput);
+    });
+}
+
+function loadDrivers(vehicleType, driverSelect, shiftsInput) {
+    // Эмуляция загрузки водителей из базы данных
+    const drivers = [
+        {id: 1, name: 'Иванов И.И.', shifts: 2},
+        {id: 2, name: 'Петров П.П.', shifts: 0},
+        {id: 3, name: 'Сидоров С.С.', shifts: 1}
+    ];
+    
+    driverSelect.innerHTML = '<option value="">Выберите водителя</option>';
+    drivers.forEach(driver => {
+        const option = new Option(`${driver.name} (${driver.shifts} смен)`, driver.id);
+        driverSelect.add(option);
+    });
+    
+    driverSelect.addEventListener('change', function() {
+        const selectedDriver = drivers.find(d => d.id == this.value);
+        if (selectedDriver) {
+            shiftsInput.value = selectedDriver.shifts;
+        }
+    });
+}
+
+function removeVehicle(button) {
+    button.closest('.vehicle-item').remove();
+    // Пересчитываем номера техники
+    const items = document.querySelectorAll('.vehicle-item');
+    items.forEach((item, index) => {
+        item.querySelector('h6').textContent = `Техника #${index + 1}`;
+    });
+    vehicleCount = items.length;
+}
+
+function saveDailyRequest() {
+    const form = document.getElementById('dailyRequestForm');
+    if (form.checkValidity()) {
+        // Сохранение заявки
+        alert('Заявка сохранена');
+        bootstrap.Modal.getInstance(document.getElementById('createRequestModal')).hide();
+    } else {
+        form.reportValidity();
+    }
+}
+</script>
+{% endblock %}

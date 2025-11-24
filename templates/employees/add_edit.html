@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% if employee %}Редактировать{% else %}Добавить{% endif %} сотрудника</h2>
+        <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" id="employeeForm">
+        {% if employee %}
+        <input type="hidden" name="employee_id" value="{{ employee.id }}">
+        {% endif %}
+        
+        <div class="row">
+            <!-- Левая колонка - Основная информация -->
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Основная информация</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Фамилия *</label>
+                                    <input type="text" class="form-control" name="last_name" 
+                                           value="{{ employee.last_name if employee else '' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Имя *</label>
+                                    <input type="text" class="form-control" name="first_name" 
+                                           value="{{ employee.first_name if employee else '' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Отчество</label>
+                                    <input type="text" class="form-control" name="middle_name" 
+                                           value="{{ employee.middle_name if employee else '' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Пол</label>
+                                    <select class="form-select" name="gender">
+                                        <option value="">Выберите пол</option>
+                                        <option value="male" {% if employee and employee.gender == 'male' %}selected{% endif %}>Мужской</option>
+                                        <option value="female" {% if employee and employee.gender == 'female' %}selected{% endif %}>Женский</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Дата рождения</label>
+                                    <input type="date" class="form-control" name="birth_date" 
+                                           value="{{ employee.birth_date.strftime('%Y-%m-%d') if employee and employee.birth_date else '' }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Рабочая информация</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Подразделение</label>
+                            <div class="input-group">
+                                <select class="form-select" name="department_id" id="departmentSelect">
+                                    <option value="">Выберите подразделение</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.id }}" {% if employee and employee.department_id == dept.id %}selected{% endif %}>
+                                        {{ dept.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" onclick="showAddDepartmentModal()">+</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteSelectedDepartment()">×</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Должность</label>
+                            <div class="input-group">
+                                <select class="form-select" name="position_id" id="positionSelect">
+                                    <option value="">Выберите должность</option>
+                                    {% for position in positions %}
+                                    <option value="{{ position.id }}" {% if employee and employee.position_id == position.id %}selected{% endif %}>
+                                        {{ position.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" onclick="showAddPositionModal()">+</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteSelectedPosition()">×</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Контактная информация</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" class="form-control" name="phone" 
+                                   value="{{ employee.phone if employee else '' }}" 
+                                   placeholder="+7 (XXX) XXX-XX-XX">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" 
+                                   value="{{ employee.email if employee else '' }}" 
+                                   placeholder="example@mail.ru">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Место проживания</label>
+                            <div class="input-group">
+                                <select class="form-select" name="city_id" id="citySelect">
+                                    <option value="">Выберите место проживания</option>
+                                    {% for city in cities %}
+                                    <option value="{{ city.id }}" {% if employee and employee.city_id == city.id %}selected{% endif %}>
+                                        {{ city.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" onclick="showAddCityModal()">+</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteSelectedCity()">×</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка - Документы и допуски -->
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Паспортные данные</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Серия паспорта</label>
+                                    <input type="text" class="form-control" name="passport_series" 
+                                           value="{{ employee.passport_series if employee else '' }}" 
+                                           maxlength="4" placeholder="0000">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Номер паспорта</label>
+                                    <input type="text" class="form-control" name="passport_number" 
+                                           value="{{ employee.passport_number if employee else '' }}" 
+                                           maxlength="6" placeholder="000000">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Водительское удостоверение</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="has_driver_license" 
+                                   id="hasLicense" {% if employee and employee.has_driver_license %}checked{% endif %}>
+                            <label class="form-check-label" for="hasLicense">Наличие водительского удостоверения</label>
+                        </div>
+                        <div id="licenseCategories" style="display: {% if employee and employee.has_driver_license %}block{% else %}none{% endif %};">
+                            <label class="form-label">Категории прав</label>
+                            <div>
+                                {% for category in ['A', 'B', 'C', 'D', 'BE', 'CE', 'DE'] %}
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="license_categories" 
+                                           value="{{ category }}" id="cat{{ category }}"
+                                           {% if employee and employee.license_categories and category in employee.license_categories %}checked{% endif %}>
+                                    <label class="form-check-label" for="cat{{ category }}">{{ category }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Допуски и осмотры</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Удостоверение-допуск №</label>
+                            <input type="text" class="form-control" name="pass_number" 
+                                   value="{{ employee.pass_number if employee else '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Срок действия допуска</label>
+                            <input type="date" class="form-control" name="pass_expiry" 
+                                   value="{{ employee.pass_expiry.strftime('%Y-%m-%d') if employee and employee.pass_expiry else '' }}">
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="medical_exam_not_required" 
+                                   id="medicalNotRequired" {% if employee and employee.medical_exam_not_required %}checked{% endif %}>
+                            <label class="form-check-label" for="medicalNotRequired">Медосмотр не требуется</label>
+                        </div>
+                        
+                        <div id="medicalExamFields" style="display: {% if employee and employee.medical_exam_not_required %}none{% else %}block{% endif %};">
+                            <div class="mb-3">
+                                <label class="form-label">Медосмотр до</label>
+                                <input type="date" class="form-control" name="medical_exam_expiry" 
+                                       value="{{ employee.medical_exam_expiry.strftime('%Y-%m-%d') if employee and employee.medical_exam_expiry else '' }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="psychiatric_exam_not_required" 
+                                   id="psychiatricNotRequired" {% if employee and employee.psychiatric_exam_not_required %}checked{% endif %}>
+                            <label class="form-check-label" for="psychiatricNotRequired">Психиатрическое освидетельствование не требуется</label>
+                        </div>
+                        
+                        <div id="psychiatricExamFields" style="display: {% if employee and employee.psychiatric_exam_not_required %}none{% else %}block{% endif %};">
+                            <div class="mb-3">
+                                <label class="form-label">Психиатрическое освидетельствование до</label>
+                                <input type="date" class="form-control" name="psychiatric_exam_expiry" 
+                                       value="{{ employee.psychiatric_exam_expiry.strftime('%Y-%m-%d') if employee and employee.psychiatric_exam_expiry else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Размеры одежды</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Рост</label>
+                                    <input type="text" class="form-control" name="height" 
+                                           value="{{ employee.height if employee else '' }}" placeholder="см">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Размер одежды</label>
+                                    <input type="text" class="form-control" name="clothing_size" 
+                                           value="{{ employee.clothing_size if employee else '' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Размер обуви</label>
+                                    <input type="text" class="form-control" name="shoe_size" 
+                                           value="{{ employee.shoe_size if employee else '' }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Фотография</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            {% if employee and employee.photo_path %}
+                            <img id="photoPreview" src="{{ url_for('storage_files', filename=employee.photo_path) }}" 
+                                 alt="Фото сотрудника" style="max-width: 200px;">
+                            {% else %}
+                            <img id="photoPreview" src="#" alt="Предпросмотр фото" style="max-width: 200px; display: none;">
+                            {% endif %}
+                        </div>
+                        <input type="file" class="form-control" name="photo" accept="image/*" id="photoInput">
+                        <small class="text-muted">Фото 3/4, формат JPG/PNG, макс. 5MB</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">Сохранить</button>
+                <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">Отменить</a>
+                
+                {% if employee %}
+                <button type="button" class="btn btn-info" onclick="viewEmployeePasses({{ employee.id }})">Просмотр пропусков</button>
+                <button type="button" class="btn btn-warning" onclick="viewEmployeeDocuments({{ employee.id }})">Документы</button>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Модальные окна для добавления справочников -->
+<div class="modal fade" id="addDepartmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить подразделение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="newDepartmentName" placeholder="Введите название подразделения">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="addNewDepartment()">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPositionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить должность</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="newPositionName" placeholder="Введите название должности">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="addNewPosition()">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addCityModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить место проживания</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="newCityName" placeholder="Введите название города/населенного пункта">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="addNewCity()">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Управление отображением категорий прав
+document.getElementById('hasLicense').addEventListener('change', function() {
+    document.getElementById('licenseCategories').style.display = this.checked ? 'block' : 'none';
+});
+
+// Управление полями медосмотра
+document.getElementById('medicalNotRequired').addEventListener('change', function() {
+    document.getElementById('medicalExamFields').style.display = this.checked ? 'none' : 'block';
+});
+
+// Управление полями психиатрического освидетельствования
+document.getElementById('psychiatricNotRequired').addEventListener('change', function() {
+    document.getElementById('psychiatricExamFields').style.display = this.checked ? 'none' : 'block';
+});
+
+// Предпросмотр фото
+document.getElementById('photoInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('photoPreview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Функции для работы со справочниками
+function showAddDepartmentModal() {
+    document.getElementById('newDepartmentName').value = '';
+    new bootstrap.Modal(document.getElementById('addDepartmentModal')).show();
+}
+
+function showAddPositionModal() {
+    document.getElementById('newPositionName').value = '';
+    new bootstrap.Modal(document.getElementById('addPositionModal')).show();
+}
+
+function showAddCityModal() {
+    document.getElementById('newCityName').value = '';
+    new bootstrap.Modal(document.getElementById('addCityModal')).show();
+}
+
+function addNewDepartment() {
+    const name = document.getElementById('newDepartmentName').value.trim();
+    if (name) {
+        fetch('/api/departments', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: name})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('departmentSelect');
+            const option = new Option(data.name, data.id);
+            select.add(option);
+            select.value = data.id;
+            bootstrap.Modal.getInstance(document.getElementById('addDepartmentModal')).hide();
+        })
+        .catch(error => {
+            alert('Ошибка при добавлении подразделения');
+        });
+    }
+}
+
+function addNewPosition() {
+    const name = document.getElementById('newPositionName').value.trim();
+    if (name) {
+        fetch('/api/positions', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: name})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('positionSelect');
+            const option = new Option(data.name, data.id);
+            select.add(option);
+            select.value = data.id;
+            bootstrap.Modal.getInstance(document.getElementById('addPositionModal')).hide();
+        })
+        .catch(error => {
+            alert('Ошибка при добавлении должности');
+        });
+    }
+}
+
+function addNewCity() {
+    const name = document.getElementById('newCityName').value.trim();
+    if (name) {
+        fetch('/api/cities', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: name})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('citySelect');
+            const option = new Option(data.name, data.id);
+            select.add(option);
+            select.value = data.id;
+            bootstrap.Modal.getInstance(document.getElementById('addCityModal')).hide();
+        })
+        .catch(error => {
+            alert('Ошибка при добавлении места проживания');
+        });
+    }
+}
+
+function deleteSelectedDepartment() {
+    const select = document.getElementById('departmentSelect');
+    const selectedId = select.value;
+    if (selectedId && confirm('Вы уверены, что хотите удалить это подразделение?')) {
+        fetch(`/api/departments/${selectedId}`, {method: 'DELETE'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                select.remove(select.selectedIndex);
+                select.value = '';
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении подразделения');
+        });
+    }
+}
+
+function deleteSelectedPosition() {
+    const select = document.getElementById('positionSelect');
+    const selectedId = select.value;
+    if (selectedId && confirm('Вы уверены, что хотите удалить эту должность?')) {
+        fetch(`/api/positions/${selectedId}`, {method: 'DELETE'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                select.remove(select.selectedIndex);
+                select.value = '';
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении должности');
+        });
+    }
+}
+
+function deleteSelectedCity() {
+    const select = document.getElementById('citySelect');
+    const selectedId = select.value;
+    if (selectedId && confirm('Вы уверены, что хотите удалить это место проживания?')) {
+        fetch(`/api/cities/${selectedId}`, {method: 'DELETE'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                select.remove(select.selectedIndex);
+                select.value = '';
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении места проживания');
+        });
+    }
+}
+
+function viewEmployeePasses(employeeId) {
+    window.location.href = `/employees/${employeeId}/passes`;
+}
+
+function viewEmployeeDocuments(employeeId) {
+    window.location.href = `/employees/${employeeId}/documents`;
+}
+</script>
+{% endblock %}

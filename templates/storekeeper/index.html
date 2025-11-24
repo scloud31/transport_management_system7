@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2>Кабинет кладовщика</h2>
+            <p class="lead">Учет материальных ценностей и спецодежды</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- ТТН -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Товарно-транспортные накладные</h5>
+                    <p class="card-text">Оформление ТТН на грузоперевозки</p>
+                    <a href="{{ url_for('create_ttn') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Спецодежда -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Учет спецодежды</h5>
+                    <p class="card-text">Выдача и учет спецодежды сотрудникам</p>
+                    <a href="{{ url_for('uniform_accounting') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нормы спецодежды -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Нормы спецодежды</h5>
+                    <p class="card-text">Установка норм выдачи спецодежды</p>
+                    <a href="{{ url_for('uniform_norms') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Материалы -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Учет материалов</h5>
+                    <p class="card-text">Учет расходных материалов</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Инвентаризация -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Инвентаризация</h5>
+                    <p class="card-text">Проведение инвентаризаций</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Отчеты -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Отчеты</h5>
+                    <p class="card-text">Формирование складских отчетов</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Статистика спецодежды</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3>0</h3>
+                            <p class="text-muted">Выдано сегодня</p>
+                        </div>
+                        <div class="col-6">
+                            <h3>0</h3>
+                            <p class="text-muted">Срок истекает</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Статистика ТТН</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3>0</h3>
+                            <p class="text-muted">Создано сегодня</p>
+                        </div>
+                        <div class="col-6">
+                            <h3>0</h3>
+                            <p class="text-muted">Всего за месяц</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка назад -->
+    <div class="mt-5 text-center">
+        <a href="{{ url_for('main_menu') }}" class="btn btn-secondary">Назад в главное меню</a>
+    </div>
+</div>
+{% endblock %}

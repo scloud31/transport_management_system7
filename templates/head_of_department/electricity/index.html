@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Учет электроэнергии</h2>
+        <a href="{{ url_for('head_of_department_index') }}" class="btn btn-secondary">Назад</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Передать показания</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('save_electricity_readings') }}">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Выбрать дату *</label>
+                                <input type="date" class="form-control" name="reading_date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Выбрать файл для обновления *</label>
+                                <input type="file" class="form-control" name="excel_file" accept=".xlsx,.xls" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6>Показания БПО</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Предыдущие показания БПО</label>
+                                            <input type="text" class="form-control" name="previous_bpo" id="previousBpo" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Текущие показания БПО *</label>
+                                            <input type="text" class="form-control" name="current_bpo" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h6>Показания общежития</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Предыдущие показания общежития</label>
+                                            <input type="text" class="form-control" name="previous_dormitory" id="previousDormitory" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Текущие показания общежития *</label>
+                                            <input type="text" class="form-control" name="current_dormitory" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success">Передать показания</button>
+                            <button type="button" class="btn btn-info" onclick="printReadings()">Печать</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>История показаний</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for reading in recent_readings %}
+                        <div class="list-group-item">
+                            <small class="text-muted">{{ reading.date.strftime('%d.%m.%Y') }}</small><br>
+                            <strong>БПО:</strong> {{ reading.current_bpo }}<br>
+                            <strong>Общежитие:</strong> {{ reading.current_dormitory }}
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center">Нет данных</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function printReadings() {
+    // Логика печати показаний
+    alert('Функция печати в разработке');
+}
+
+// Автозаполнение предыдущих показаний при выборе файла
+document.querySelector('input[name="excel_file"]').addEventListener('change', function(e) {
+    // В реальной системе здесь будет AJAX запрос для получения предыдущих показаний
+    const file = e.target.files[0];
+    if (file) {
+        // Эмуляция получения данных из файла
+        document.getElementById('previousBpo').value = '12500';
+        document.getElementById('previousDormitory').value = '8900';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2>Кабинет ОТ, ПБ и БДД</h2>
+            <p class="lead">Охрана труда, промышленная безопасность и безопасность дорожного движения</p>
+        </div>
+    </div>
+
+    <!-- Предупреждения о просроченных документах -->
+    {% if expired_employees or expired_vehicles %}
+    <div class="alert alert-warning">
+        <h5>⚠️ Внимание! Имеются просроченные документы:</h5>
+        {% if expired_employees %}
+        <p><strong>Сотрудники:</strong> {{ expired_employees|length }} чел. с просроченными документами</p>
+        {% endif %}
+        {% if expired_vehicles %}
+        <p><strong>Транспорт:</strong> {{ expired_vehicles|length }} ед. с просроченными документами</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Тестирование -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Тестирование</h5>
+                    <p class="card-text">Проведение тестов по ОТ и ПБ</p>
+                    <a href="{{ url_for('tests_list') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Медосмотры -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Медосмотры</h5>
+                    <p class="card-text">Контроль сроков медицинских осмотров</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Допуски -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Удостоверения допуски</h5>
+                    <p class="card-text">Учет и контроль сроков действия допусков</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Инструктажи -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Инструктажи</h5>
+                    <p class="card-text">Проведение и учет инструктажей</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Расследования -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Расследования</h5>
+                    <p class="card-text">Расследование несчастных случаев</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Отчетность -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Отчетность</h5>
+                    <p class="card-text">Формирование отчетов по ОТ и ПБ</p>
+                    <a href="#" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица просроченных документов -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Сотрудники с просроченными документами</h5>
+                </div>
+                <div class="card-body">
+                    {% if expired_employees %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ФИО</th>
+                                    <th>Просрочено</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in expired_employees %}
+                                <tr>
+                                    <td>{{ employee.last_name }} {{ employee.first_name }}</td>
+                                    <td>
+                                        {% if employee.pass_expiry and employee.pass_expiry < current_time.date() %}
+                                        <span class="badge bg-danger">Допуск</span>
+                                        {% endif %}
+                                        {% if employee.medical_exam_expiry and employee.medical_exam_expiry < current_time.date() %}
+                                        <span class="badge bg-danger">Медосмотр</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">Нет просроченных документов</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Транспорт с просроченными документами</h5>
+                </div>
+                <div class="card-body">
+                    {% if expired_vehicles %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Транспорт</th>
+                                    <th>Просрочено</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vehicle in expired_vehicles %}
+                                <tr>
+                                    <td>{{ vehicle.brand }} ({{ vehicle.license_plate }})</td>
+                                    <td>
+                                        {% if vehicle.pass_expiry and vehicle.pass_expiry < current_time.date() %}
+                                        <span class="badge bg-danger">Допуск</span>
+                                        {% endif %}
+                                        {% if vehicle.insurance_expiry and vehicle.insurance_expiry < current_time.date() %}
+                                        <span class="badge bg-danger">Страховка</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">Нет просроченных документов</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка назад -->
+    <div class="mt-5 text-center">
+        <a href="{{ url_for('main_menu') }}" class="btn btn-secondary">Назад в главное меню</a>
+    </div>
+</div>
+{% endblock %}

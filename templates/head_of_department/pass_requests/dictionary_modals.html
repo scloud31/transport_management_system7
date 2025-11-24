@@ -1,0 +1,184 @@
+<!-- Модальное окно добавления поста -->
+<div class="modal fade" id="addpostsModal" tabindex="-1" aria-labelledby="addpostsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addpostsModalLabel">Добавить пост</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPostForm">
+                    <div class="mb-3">
+                        <label for="postName" class="form-label">Название поста *</label>
+                        <input type="text" class="form-control" id="postName" required
+                            placeholder="Например: Пост №1 - Главный въезд">
+                    </div>
+                    <div class="mb-3">
+                        <label for="postDescription" class="form-label">Описание</label>
+                        <textarea class="form-control" id="postDescription" rows="3"
+                            placeholder="Описание поста (необязательно)"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="addPostForm" class="btn btn-primary">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления договора -->
+<div class="modal fade" id="addcontractsModal" tabindex="-1" aria-labelledby="addcontractsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addcontractsModalLabel">Добавить договор</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addContractForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contractNumber" class="form-label">Номер договора *</label>
+                                <input type="text" class="form-control" id="contractNumber" required
+                                    placeholder="Например: ДГ-001/2024">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contractName" class="form-label">Название договора</label>
+                                <input type="text" class="form-control" id="contractName"
+                                    placeholder="Например: Договор на транспортные услуги">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contractStartDate" class="form-label">Дата начала *</label>
+                                <input type="date" class="form-control" id="contractStartDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contractEndDate" class="form-label">Дата окончания</label>
+                                <input type="date" class="form-control" id="contractEndDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contractCustomer" class="form-label">Заказчик</label>
+                        <input type="text" class="form-control" id="contractCustomer"
+                            placeholder="Наименование заказчика">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="addContractForm" class="btn btn-primary">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления ИНН -->
+<div class="modal fade" id="addinnsModal" tabindex="-1" aria-labelledby="addinnsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addinnsModalLabel">Добавить ИНН организации</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addInnForm">
+                    <div class="mb-3">
+                        <label for="innNumber" class="form-label">ИНН *</label>
+                        <input type="text" class="form-control" id="innNumber" required placeholder="10 или 12 цифр">
+                    </div>
+                    <div class="mb-3">
+                        <label for="organizationName" class="form-label">Название организации *</label>
+                        <input type="text" class="form-control" id="organizationName" required
+                            placeholder="Полное наименование организации">
+                    </div>
+                    <div class="mb-3">
+                        <label for="contactPerson" class="form-label">Контактное лицо</label>
+                        <input type="text" class="form-control" id="contactPerson" placeholder="ФИО контактного лица">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="innPhone" class="form-label">Телефон</label>
+                                <input type="tel" class="form-control" id="innPhone" placeholder="+7 (XXX) XXX-XX-XX">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="innEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="innEmail" placeholder="email@example.com">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="addInnForm" class="btn btn-primary">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления согласующего лица -->
+<div class="modal fade" id="addagreement_personsModal" tabindex="-1" aria-labelledby="addagreement_personsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addagreement_personsModalLabel">Добавить согласующее лицо</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAgreementPersonForm">
+                    <div class="mb-3">
+                        <label for="agreementPersonName" class="form-label">ФИО *</label>
+                        <input type="text" class="form-control" id="agreementPersonName" required
+                            placeholder="Иванов Иван Иванович">
+                    </div>
+                    <div class="mb-3">
+                        <label for="agreementPersonPosition" class="form-label">Должность</label>
+                        <input type="text" class="form-control" id="agreementPersonPosition"
+                            placeholder="Например: Начальник отдела">
+                    </div>
+                    <div class="mb-3">
+                        <label for="agreementPersonOrganization" class="form-label">Организация</label>
+                        <input type="text" class="form-control" id="agreementPersonOrganization"
+                            placeholder="Наименование организации">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="agreementPersonPhone" class="form-label">Телефон</label>
+                                <input type="tel" class="form-control" id="agreementPersonPhone"
+                                    placeholder="+7 (XXX) XXX-XX-XX">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="agreementPersonEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="agreementPersonEmail"
+                                    placeholder="email@example.com">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="addAgreementPersonForm" class="btn btn-primary">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>

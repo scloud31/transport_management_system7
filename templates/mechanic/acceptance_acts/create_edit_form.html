@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ 'Редактировать' if form else 'Создать' }} форму акта</h2>
+        <a href="{{ url_for('acceptance_acts_list') }}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('save_acceptance_act_form') }}">
+        {% if form %}
+        <input type="hidden" name="form_id" value="{{ form.id }}">
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Основная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Название формы акта *</label>
+                    <input type="text" class="form-control" name="form_name" 
+                           value="{{ form.name if form else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Тип акта</label>
+                    <select class="form-select" name="act_type">
+                        <option value="equipment" {{ 'selected' if form and form.act_type == 'equipment' else '' }}>
+                            Оборудование
+                        </option>
+                        <option value="vehicle" {{ 'selected' if form and form.act_type == 'vehicle' else '' }}>
+                            Транспортное средство
+                        </option>
+                        <option value="tools" {{ 'selected' if form and form.act_type == 'tools' else '' }}>
+                            Инструменты
+                        </option>
+                        <option value="other" {{ 'selected' if form and form.act_type == 'other' else '' }}>
+                            Другое
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Структура формы акта</h5>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addActSection()">
+                        + Раздел
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="addActField()">
+                        + Поле
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="actFormStructure">
+                    {% if form and form.form_structure %}
+                        {{ form.form_structure|safe }}
+                    {% else %}
+                    <!-- Базовая структура для акта приема-передачи -->
+                    <div class="section-item card mb-3">
+                        <div class="card-header">
+                            <h6>Основная информация</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="field-item mb-3">
+                                <label class="form-label">Наименование объекта *</label>
+                                <input type="text" class="form-control" name="field_1" required>
+                            </div>
+                            <div class="field-item mb-3">
+                                <label class="form-label">Инвентарный номер</label>
+                                <input type="text" class="form-control" name="field_2">
+                            </div>
+                            <div class="field-item mb-3">
+                                <label class="form-label">Дата составления акта *</label>
+                                <input type="date" class="form-control" name="field_3" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-item card mb-3">
+                        <div class="card-header">
+                            <h6>Стороны акта</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="field-item mb-3">
+                                <label class="form-label">Сдающая сторона *</label>
+                                <input type="text" class="form-control" name="field_4" required>
+                            </div>
+                            <div class="field-item mb-3">
+                                <label class="form-label">Принимающая сторона *</label>
+                                <input type="text" class="form-control" name="field_5" required>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">Сохранить форму акта</button>
+            <a href="{{ url_for('acceptance_acts_list') }}" class="btn btn-secondary">Отменить</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Аналогично скриптам для чек-листов, но с дополнительными функциями для актов
+function addActSection() {
+    // Реализация аналогична addSection() из чек-листов
+}
+
+function addActField() {
+    // Реализация аналогична addField() из чек-листов
+}
+</script>
+{% endblock %}

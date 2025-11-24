@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Карточка сотрудника</h2>
+        <div>
+            <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">Назад к списку</a>
+            <a href="{{ url_for('employee_edit', employee_id=employee.id) }}" class="btn btn-warning">Редактировать</a>
+            <form method="POST" action="{{ url_for('employee_delete', employee_id=employee.id) }}" 
+                  class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить этого сотрудника?');">
+                <button type="submit" class="btn btn-danger">Удалить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Левая колонка - фото и основная информация -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if employee.photo_path %}
+                    <img src="{{ url_for('storage_files', filename=employee.photo_path) }}" 
+                         alt="Фото сотрудника" class="employee-photo img-fluid mb-3 rounded" style="max-height: 300px;">
+                    {% else %}
+                    <div class="bg-light rounded d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 200px; height: 200px;">
+                        <span class="text-muted">Нет фото</span>
+                    </div>
+                    {% endif %}
+                    
+                    <h4>{{ employee.last_name }} {{ employee.first_name }} {{ employee.middle_name or '' }}</h4>
+                    <p class="text-muted">{{ employee.position.name if employee.position else 'Должность не указана' }}</p>
+                    
+                    <!-- Статусы документов -->
+                    <div class="mt-3">
+                        {% if employee.pass_number %}
+                        <span class="badge bg-success">Допуск: {{ employee.pass_number }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Допуск не оформлен</span>
+                        {% endif %}
+                        
+                        {% if employee.has_driver_license %}
+                        <span class="badge bg-info mt-1">Водительские права</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Контактная информация</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Телефон:</strong> {{ employee.phone or 'не указан' }}</p>
+                    <p><strong>Email:</strong> {{ employee.email or 'не указан' }}</p>
+                    <p><strong>Место проживания:</strong> {{ employee.city.name if employee.city else 'не указано' }}</p>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Размеры одежды</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <strong>Рост</strong><br>
+                            {{ employee.height or 'не указан' }}
+                        </div>
+                        <div class="col-4">
+                            <strong>Одежда</strong><br>
+                            {{ employee.clothing_size or 'не указан' }}
+                        </div>
+                        <div class="col-4">
+                            <strong>Обувь</strong><br>
+                            {{ employee.shoe_size or 'не указан' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка - детальная информация -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Основная информация</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Дата рождения:</strong> 
+                                {% if employee.birth_date %}
+                                {{ employee.birth_date.strftime('%d.%m.%Y') }}
+                                {% else %}
+                                не указана
+                                {% endif %}
+                            </p>
+                            <p><strong>Пол:</strong> 
+                                {% if employee.gender == 'male' %}Мужской
+                                {% elif employee.gender == 'female' %}Женский
+                                {% else %}не указан
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Подразделение:</strong> {{ employee.department.name if employee.department else 'не указано' }}</p>
+                            <p><strong>Должность:</strong> {{ employee.position.name if employee.position else 'не указана' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Паспортные данные</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Серия и номер:</strong> 
+                        {% if employee.passport_series and employee.passport_number %}
+                        {{ employee.passport_series }} {{ employee.passport_number }}
+                        {% else %}
+                        не указаны
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Водительское удостоверение</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Наличие прав:</strong> 
+                        {% if employee.has_driver_license %}Да{% else %}Нет{% endif %}
+                    </p>
+                    {% if employee.has_driver_license %}
+                    <p><strong>Категории:</strong> {{ employee.license_categories or 'не указаны' }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Допуски и осмотры</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Удостоверение-допуск:</strong> {{ employee.pass_number or 'не указан' }}</p>
+                            <p><strong>Срок действия:</strong> 
+                                {% if employee.pass_expiry %}
+                                {{ employee.pass_expiry.strftime('%d.%m.%Y') }}
+                                {% if employee.pass_expiry < current_time.date() %}
+                                <span class="badge bg-danger">Просрочен</span>
+                                {% endif %}
+                                {% else %}
+                                не указан
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Медосмотр до:</strong> 
+                                {% if employee.medical_exam_not_required %}
+                                не требуется
+                                {% elif employee.medical_exam_expiry %}
+                                {{ employee.medical_exam_expiry.strftime('%d.%m.%Y') }}
+                                {% if employee.medical_exam_expiry < current_time.date() %}
+                                <span class="badge bg-danger">Просрочен</span>
+                                {% endif %}
+                                {% else %}
+                                не указан
+                                {% endif %}
+                            </p>
+                            <p><strong>Психиатрическое освидетельствование до:</strong> 
+                                {% if employee.psychiatric_exam_not_required %}
+                                не требуется
+                                {% elif employee.psychiatric_exam_expiry %}
+                                {{ employee.psychiatric_exam_expiry.strftime('%d.%m.%Y') }}
+                                {% if employee.psychiatric_exam_expiry < current_time.date() %}
+                                <span class="badge bg-danger">Просрочен</span>
+                                {% endif %}
+                                {% else %}
+                                не указан
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопки дополнительных действий -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <a href="{{ url_for('employee_passes', employee_id=employee.id) }}" class="btn btn-info me-2">
+                        Посмотреть существующие пропуска
+                    </a>
+                    <a href="{{ url_for('employee_documents', employee_id=employee.id) }}" class="btn btn-warning">
+                        Управление документами
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

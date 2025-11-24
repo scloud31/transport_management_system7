@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Документы сотрудника: {{ employee.last_name }} {{ employee.first_name }}</h2>
+        <a href="{{ url_for('employee_card', employee_id=employee.id) }}" class="btn btn-secondary">Назад к карточке</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Загрузить документ</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('upload_employee_document', employee_id=employee.id) }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Тип документа</label>
+                            <select class="form-select" name="document_type">
+                                <option value="passport">Паспорт</option>
+                                <option value="license">Водительское удостоверение</option>
+                                <option value="medical">Медицинская справка</option>
+                                <option value="education">Образование</option>
+                                <option value="other">Другой документ</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Файл документа</label>
+                            <input type="file" class="form-control" name="document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Описание</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">Загрузить документ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Загруженные документы</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6>Система документов в разработке</h6>
+                        <p class="mb-0">Функционал управления документами будет доступен в ближайшее время.</p>
+                    </div>
+                    
+                    <!-- Здесь будет список документов -->
+                    <div class="list-group">
+                        <div class="list-group-item text-center text-muted">
+                            Нет загруженных документов
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

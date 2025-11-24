@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Карточка транспортного средства</h2>
+        <div>
+            <a href="{{ url_for('transport_list') }}" class="btn btn-secondary">Назад к списку</a>
+            <a href="{{ url_for('vehicle_edit', vehicle_id=vehicle.id) }}" class="btn btn-warning">Редактировать</a>
+            <form method="POST" action="{{ url_for('vehicle_delete', vehicle_id=vehicle.id) }}" 
+                  class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить этот транспорт?');">
+                <button type="submit" class="btn btn-danger">Удалить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Левая колонка - основная информация -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Основная информация</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Тип ТС:</strong></td>
+                            <td>{{ vehicle.vehicle_type.name if vehicle.vehicle_type else 'не указан' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Марка:</strong></td>
+                            <td>{{ vehicle.brand }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Госномер:</strong></td>
+                            <td><strong>{{ vehicle.license_plate }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Категория:</strong></td>
+                            <td>{{ vehicle.vehicle_category.name if vehicle.vehicle_category else 'не указана' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Подразделение:</strong></td>
+                            <td>{{ vehicle.department.name if vehicle.department else 'не указано' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Год выпуска:</strong></td>
+                            <td>{{ vehicle.manufacture_year or 'не указан' }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка - документы -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Документы и сроки действия</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Удостоверение-допуск:</strong></td>
+                            <td>{{ vehicle.pass_number or 'не указан' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Срок действия допуска:</strong></td>
+                            <td>
+                                {% if vehicle.pass_expiry %}
+                                {{ vehicle.pass_expiry.strftime('%d.%m.%Y') }}
+                                {% if vehicle.pass_expiry < current_time.date() %}
+                                <span class="badge bg-danger">Просрочен</span>
+                                {% else %}
+                                <span class="badge bg-success">Действует</span>
+                                {% endif %}
+                                {% else %}
+                                не указан
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Страховка до:</strong></td>
+                            <td>
+                                {% if vehicle.insurance_expiry %}
+                                {{ vehicle.insurance_expiry.strftime('%d.%m.%Y') }}
+                                {% if vehicle.insurance_expiry < current_time.date() %}
+                                <span class="badge bg-danger">Просрочена</span>
+                                {% else %}
+                                <span class="badge bg-success">Действует</span>
+                                {% endif %}
+                                {% else %}
+                                не указана
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Техосмотр до:</strong></td>
+                            <td>
+                                {% if vehicle.inspection_expiry %}
+                                {{ vehicle.inspection_expiry.strftime('%d.%m.%Y') }}
+                                {% if vehicle.inspection_expiry < current_time.date() %}
+                                <span class="badge bg-danger">Просрочен</span>
+                                {% else %}
+                                <span class="badge bg-success">Действует</span>
+                                {% endif %}
+                                {% else %}
+                                не указан
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Статусы документов -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Статусы документов</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="mb-2">
+                                {% if vehicle.pass_expiry %}
+                                    {% if vehicle.pass_expiry < current_time.date() %}
+                                    <span class="badge bg-danger p-2">⚠️<br>Допуск</span>
+                                    {% else %}
+                                    <span class="badge bg-success p-2">✅<br>Допуск</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary p-2">❓<br>Допуск</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2">
+                                {% if vehicle.insurance_expiry %}
+                                    {% if vehicle.insurance_expiry < current_time.date() %}
+                                    <span class="badge bg-danger p-2">⚠️<br>Страховка</span>
+                                    {% else %}
+                                    <span class="badge bg-success p-2">✅<br>Страховка</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary p-2">❓<br>Страховка</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2">
+                                {% if vehicle.inspection_expiry %}
+                                    {% if vehicle.inspection_expiry < current_time.date() %}
+                                    <span class="badge bg-danger p-2">⚠️<br>Техосмотр</span>
+                                    {% else %}
+                                    <span class="badge bg-success p-2">✅<br>Техосмотр</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary p-2">❓<br>Техосмотр</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка просмотра существующих пропусков -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <button class="btn btn-info" onclick="showExistingPasses({{ vehicle.id }})">
+                        Посмотреть существующие пропуска
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showExistingPasses(vehicleId) {
+    alert('Функция просмотра пропусков в разработке для ТС ID: ' + vehicleId);
+}
+</script>
+{% endblock %}

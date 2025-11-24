@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Управление справочниками</h2>
+        <a href="{{ url_for('pass_requests_list') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к заявкам
+        </a>
+    </div>
+
+    <!-- Навигация по справочникам -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <ul class="nav nav-pills card-header-pills" id="dictTabs">
+                <li class="nav-item">
+                    <a class="nav-link dict-nav-link active" href="#" data-dict="posts">
+                        <i class="bi bi-postcard"></i> Посты
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link dict-nav-link" href="#" data-dict="contracts">
+                        <i class="bi bi-file-earmark-text"></i> Договоры
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link dict-nav-link" href="#" data-dict="inns">
+                        <i class="bi bi-building"></i> ИНН организаций
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link dict-nav-link" href="#" data-dict="agreement_persons">
+                        <i class="bi bi-person-badge"></i> Согласующие лица
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Контент справочников -->
+    <div class="dictionary-content">
+        <!-- Посты -->
+        <div class="dictionary-section active" id="postsSection" data-loaded="false">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-postcard"></i> Посты</h5>
+                    <button class="btn btn-sm btn-success" onclick="dictManager.showAddModal('posts')">
+                        <i class="bi bi-plus"></i> Добавить пост
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="postsList" class="list-group">
+                        <div class="list-group-item text-center text-muted py-4">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            Загрузка постов...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Договоры -->
+        <div class="dictionary-section" id="contractsSection" data-loaded="false">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Договоры</h5>
+                    <button class="btn btn-sm btn-success" onclick="dictManager.showAddModal('contracts')">
+                        <i class="bi bi-plus"></i> Добавить договор
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="contractsList" class="list-group">
+                        <div class="list-group-item text-center text-muted py-4">
+                            Выберите вкладку "Договоры" для загрузки данных
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ИНН организаций -->
+        <div class="dictionary-section" id="innsSection" data-loaded="false">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-building"></i> ИНН организаций</h5>
+                    <button class="btn btn-sm btn-success" onclick="dictManager.showAddModal('inns')">
+                        <i class="bi bi-plus"></i> Добавить ИНН
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="innsList" class="list-group">
+                        <div class="list-group-item text-center text-muted py-4">
+                            Выберите вкладку "ИНН организаций" для загрузки данных
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Согласующие лица -->
+        <div class="dictionary-section" id="agreement_personsSection" data-loaded="false">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-person-badge"></i> Согласующие лица</h5>
+                    <button class="btn btn-sm btn-success" onclick="dictManager.showAddModal('agreement_persons')">
+                        <i class="bi bi-plus"></i> Добавить лицо
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="agreement_personsList" class="list-group">
+                        <div class="list-group-item text-center text-muted py-4">
+                            Выберите вкладку "Согласующие лица" для загрузки данных
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальные окна для добавления -->
+{% include 'head_of_department/pass_requests/dictionary_modals.html' %}
+{% endblock %}
+
+{% block styles %}
+<style>
+    .dictionary-section {
+        display: none;
+    }
+
+    .dictionary-section.active {
+        display: block;
+    }
+
+    .dict-nav-link.active {
+        background-color: #0d6efd !important;
+        color: white !important;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dictionaries_manager.js') }}"></script>
+<script>
+    // Дополнительная проверка инициализации
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('✅ Page fully loaded');
+        console.log('dictManager available:', typeof dictManager !== 'undefined');
+        console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+    });
+</script>
+{% endblock %}

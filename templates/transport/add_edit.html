@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% if vehicle %}Редактировать{% else %}Добавить{% endif %} транспорт</h2>
+        <a href="{{ url_for('transport_list') }}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+
+    <form method="POST" id="vehicleForm">
+        {% if vehicle %}
+        <input type="hidden" name="vehicle_id" value="{{ vehicle.id }}">
+        {% endif %}
+        
+        <div class="row">
+            <!-- Левая колонка -->
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Основная информация</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Тип ТС</label>
+                            <div class="input-group">
+                                <select class="form-select" name="vehicle_type_id" id="vehicleTypeSelect" required>
+                                    <option value="">Выберите тип ТС</option>
+                                    {% for type in vehicle_types %}
+                                    <option value="{{ type.id }}" {% if vehicle and vehicle.vehicle_type_id == type.id %}selected{% endif %}>
+                                        {{ type.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" onclick="showAddVehicleTypeModal()">+</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteSelectedVehicleType()">×</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Марка *</label>
+                            <input type="text" class="form-control" name="brand" 
+                                   value="{{ vehicle.brand if vehicle else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Госномер *</label>
+                            <input type="text" class="form-control" name="license_plate" 
+                                   value="{{ vehicle.license_plate if vehicle else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Год выпуска</label>
+                            <input type="number" class="form-control" name="manufacture_year" 
+                                   value="{{ vehicle.manufacture_year if vehicle else '' }}" 
+                                   min="1950" max="{{ current_time.year }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Категория и подразделение</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Категория ТС</label>
+                            <div class="input-group">
+                                <select class="form-select" name="vehicle_category_id" id="vehicleCategorySelect">
+                                    <option value="">Выберите категорию</option>
+                                    {% for category in vehicle_categories %}
+                                    <option value="{{ category.id }}" {% if vehicle and vehicle.vehicle_category_id == category.id %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" onclick="showAddVehicleCategoryModal()">+</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteSelectedVehicleCategory()">×</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Подразделение</label>
+                            <select class="form-select" name="department_id">
+                                <option value="">Выберите подразделение</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if vehicle and vehicle.department_id == dept.id %}selected{% endif %}>
+                                    {{ dept.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка -->
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Документы и сроки действия</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Удостоверение-допуск №</label>
+                            <input type="text" class="form-control" name="pass_number" 
+                                   value="{{ vehicle.pass_number if vehicle else '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Срок действия допуска</label>
+                            <input type="date" class="form-control" name="pass_expiry" 
+                                   value="{{ vehicle.pass_expiry.strftime('%Y-%m-%d') if vehicle and vehicle.pass_expiry else '' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Страховка до</label>
+                            <input type="date" class="form-control" name="insurance_expiry" 
+                                   value="{{ vehicle.insurance_expiry.strftime('%Y-%m-%d') if vehicle and vehicle.insurance_expiry else '' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Техосмотр до</label>
+                            <input type="date" class="form-control" name="inspection_expiry" 
+                                   value="{{ vehicle.inspection_expiry.strftime('%Y-%m-%d') if vehicle and vehicle.inspection_expiry else '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Статусы документов -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Статусы документов</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if vehicle %}
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <strong>Допуск</strong><br>
+                                {% if vehicle.pass_expiry %}
+                                    {% if vehicle.pass_expiry < current_time.date() %}
+                                    <span class="badge bg-danger">Просрочен</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Действует</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary">Нет данных</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-4">
+                                <strong>Страховка</strong><br>
+                                {% if vehicle.insurance_expiry %}
+                                    {% if vehicle.insurance_expiry < current_time.date() %}
+                                    <span class="badge bg-danger">Просрочена</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Действует</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary">Нет данных</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-4">
+                                <strong>Техосмотр</strong><br>
+                                {% if vehicle.inspection_expiry %}
+                                    {% if vehicle.inspection_expiry < current_time.date() %}
+                                    <span class="badge bg-danger">Просрочен</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Действует</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary">Нет данных</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center">Статусы появятся после сохранения</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">Сохранить</button>
+                <a href="{{ url_for('transport_list') }}" class="btn btn-secondary">Отменить</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Модальные окна для добавления справочников -->
+<div class="modal fade" id="addVehicleTypeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить тип транспорта</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="newVehicleTypeName" placeholder="Введите тип транспорта">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="addNewVehicleType()">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addVehicleCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить категорию ТС</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="newVehicleCategoryName" placeholder="Введите категорию (A, B, C, D...)">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="addNewVehicleCategory()">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Функции для работы со справочниками транспорта
+function showAddVehicleTypeModal() {
+    document.getElementById('newVehicleTypeName').value = '';
+    new bootstrap.Modal(document.getElementById('addVehicleTypeModal')).show();
+}
+
+function showAddVehicleCategoryModal() {
+    document.getElementById('newVehicleCategoryName').value = '';
+    new bootstrap.Modal(document.getElementById('addVehicleCategoryModal')).show();
+}
+
+function addNewVehicleType() {
+    const name = document.getElementById('newVehicleTypeName').value.trim();
+    if (name) {
+        fetch('/api/vehicle_types', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: name})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('vehicleTypeSelect');
+            const option = new Option(data.name, data.id);
+            select.add(option);
+            select.value = data.id;
+            bootstrap.Modal.getInstance(document.getElementById('addVehicleTypeModal')).hide();
+        })
+        .catch(error => {
+            alert('Ошибка при добавлении типа транспорта');
+        });
+    }
+}
+
+function addNewVehicleCategory() {
+    const name = document.getElementById('newVehicleCategoryName').value.trim();
+    if (name) {
+        fetch('/api/vehicle_categories', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: name})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('vehicleCategorySelect');
+            const option = new Option(data.name, data.id);
+            select.add(option);
+            select.value = data.id;
+            bootstrap.Modal.getInstance(document.getElementById('addVehicleCategoryModal')).hide();
+        })
+        .catch(error => {
+            alert('Ошибка при добавлении категории ТС');
+        });
+    }
+}
+
+function deleteSelectedVehicleType() {
+    const select = document.getElementById('vehicleTypeSelect');
+    const selectedId = select.value;
+    if (selectedId && confirm('Вы уверены, что хотите удалить этот тип транспорта?')) {
+        fetch(`/api/vehicle_types/${selectedId}`, {method: 'DELETE'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                select.remove(select.selectedIndex);
+                select.value = '';
+            } else {
+                alert(data.error || 'Ошибка при удалении типа транспорта');
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении типа транспорта');
+        });
+    }
+}
+
+function deleteSelectedVehicleCategory() {
+    const select = document.getElementById('vehicleCategorySelect');
+    const selectedId = select.value;
+    if (selectedId && confirm('Вы уверены, что хотите удалить эту категорию ТС?')) {
+        fetch(`/api/vehicle_categories/${selectedId}`, {method: 'DELETE'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                select.remove(select.selectedIndex);
+                select.value = '';
+            } else {
+                alert(data.error || 'Ошибка при удалении категории ТС');
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении категории ТС');
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Список транспорта</h2>
+        <a href="{{ url_for('transport_add') }}" class="btn btn-success">Добавить транспорт</a>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Поиск по госномеру..." id="searchInput">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="typeFilter">
+                <option value="">Все типы ТС</option>
+                {% for type in vehicle_types %}
+                <option value="{{ type.name }}">{{ type.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="categoryFilter">
+                <option value="">Все категории</option>
+                {% for category in vehicle_categories %}
+                <option value="{{ category.name }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" id="departmentFilter">
+                <option value="">Все подразделения</option>
+                {% for dept in departments %}
+                <option value="{{ dept.name }}">{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Список транспорта -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Тип ТС</th>
+                            <th>Марка</th>
+                            <th>Госномер</th>
+                            <th>Категория</th>
+                            <th>Подразделение</th>
+                            <th>Год выпуска</th>
+                            <th>Статус документов</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vehicle in vehicles %}
+                        <tr>
+                            <td>{{ vehicle.vehicle_type.name if vehicle.vehicle_type else '' }}</td>
+                            <td>{{ vehicle.brand }}</td>
+                            <td><strong>{{ vehicle.license_plate }}</strong></td>
+                            <td>{{ vehicle.vehicle_category.name if vehicle.vehicle_category else '' }}</td>
+                            <td>{{ vehicle.department.name if vehicle.department else '' }}</td>
+                            <td>{{ vehicle.manufacture_year or '' }}</td>
+                            <td>
+                                {% if vehicle.pass_expiry and vehicle.pass_expiry < current_time.date() %}
+                                <span class="badge bg-danger" title="Просрочен допуск">⚠️</span>
+                                {% endif %}
+                                {% if vehicle.insurance_expiry and vehicle.insurance_expiry < current_time.date() %}
+                                <span class="badge bg-danger" title="Просрочена страховка">📄</span>
+                                {% endif %}
+                                {% if vehicle.inspection_expiry and vehicle.inspection_expiry < current_time.date() %}
+                                <span class="badge bg-danger" title="Просрочен техосмотр">🔧</span>
+                                {% endif %}
+                                {% if vehicle.pass_expiry and vehicle.pass_expiry >= current_time.date() and vehicle.insurance_expiry and vehicle.insurance_expiry >= current_time.date() and vehicle.inspection_expiry and vehicle.inspection_expiry >= current_time.date() %}
+                                <span class="badge bg-success">OK</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('vehicle_card', vehicle_id=vehicle.id) }}" 
+                                       class="btn btn-info" title="Просмотр карточки">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('vehicle_edit', vehicle_id=vehicle.id) }}" 
+                                       class="btn btn-warning" title="Редактировать">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('vehicle_delete', vehicle_id=vehicle.id) }}" 
+                                          class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить этот транспорт?');">
+                                        <button type="submit" class="btn btn-danger" title="Удалить">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">Транспортные средства не найдены</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка назад -->
+    <div class="mt-3">
+        <a href="{{ url_for('main_menu') }}" class="btn btn-secondary">Назад в главное меню</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Поиск по таблице
+document.getElementById('searchInput').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+
+// Фильтрация по типу ТС
+document.getElementById('typeFilter').addEventListener('change', function() {
+    const filterValue = this.value;
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const type = row.cells[0].textContent.trim();
+        if (!filterValue || type === filterValue) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+// Фильтрация по категории
+document.getElementById('categoryFilter').addEventListener('change', function() {
+    const filterValue = this.value;
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const category = row.cells[3].textContent.trim();
+        if (!filterValue || category === filterValue) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+// Фильтрация по подразделению
+document.getElementById('departmentFilter').addEventListener('change', function() {
+    const filterValue = this.value;
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const department = row.cells[4].textContent.trim();
+        if (!filterValue || department === filterValue) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

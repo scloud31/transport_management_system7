@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Нормы спецодежды</h2>
+        <a href="{{ url_for('storekeeper_index') }}" class="btn btn-secondary">Назад</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Нормы по должностям</h5>
+                    <button class="btn btn-success btn-sm" onclick="addNorm()">+ Добавить норму</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Должность</th>
+                                    <th>Тип спецодежды</th>
+                                    <th>Количество</th>
+                                    <th>Срок носки (мес)</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for norm in norms %}
+                                <tr>
+                                    <td>{{ norm.position.name }}</td>
+                                    <td>{{ norm.uniform_type.name }}</td>
+                                    <td>{{ norm.quantity }}</td>
+                                    <td>{{ norm.uniform_type.wear_period }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editNorm({{ norm.id }})">✏️</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteNorm({{ norm.id }})">🗑️</button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Нормы не установлены</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Типы спецодежды</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group mb-3">
+                        {% for uniform_type in uniform_types %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ uniform_type.name }}
+                            <small class="text-muted">{{ uniform_type.wear_period }} мес.</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="btn btn-outline-primary w-100" onclick="addUniformType()">+ Добавить тип</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления/редактирования нормы -->
+<div class="modal fade" id="normModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="normModalTitle">Добавить норму</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="normForm">
+                    <input type="hidden" id="normId" name="norm_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Должность *</label>
+                        <select class="form-select" id="positionSelect" name="position_id" required>
+                            <option value="">Выберите должность</option>
+                            {% for position in positions %}
+                            <option value="{{ position.id }}">{{ position.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Тип спецодежды *</label>
+                        <select class="form-select" id="uniformTypeSelect" name="uniform_type_id" required>
+                            <option value="">Выберите тип</option>
+                            {% for uniform_type in uniform_types %}
+                            <option value="{{ uniform_type.id }}">{{ uniform_type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Количество *</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" onclick="saveNorm()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addNorm() {
+    document.getElementById('normModalTitle').textContent = 'Добавить норму';
+    document.getElementById('normForm').reset();
+    document.getElementById('normId').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('normModal'));
+    modal.show();
+}
+
+function editNorm(normId) {
+    // Загрузка данных нормы и открытие модального окна
+    document.getElementById('normModalTitle').textContent = 'Редактировать норму';
+    // Здесь будет загрузка данных через AJAX
+    const modal = new bootstrap.Modal(document.getElementById('normModal'));
+    modal.show();
+}
+
+function deleteNorm(normId) {
+    if (confirm('Вы уверены, что хотите удалить эту норму?')) {
+        // Удаление нормы через AJAX
+        alert('Норма удалена');
+    }
+}
+
+function addUniformType() {
+    const name = prompt('Введите название типа спецодежды:');
+    const period = prompt('Введите срок носки (в месяцах):');
+    
+    if (name && period) {
+        // Добавление типа через AJAX
+        alert('Тип спецодежды добавлен');
+    }
+}
+
+function saveNorm() {
+    const form = document.getElementById('normForm');
+    if (form.checkValidity()) {
+        // Сохранение нормы через AJAX
+        alert('Норма сохранена');
+        bootstrap.Modal.getInstance(document.getElementById('normModal')).hide();
+    } else {
+        form.reportValidity();
+    }
+}
+</script>
+{% endblock %}
